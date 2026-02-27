@@ -4,7 +4,10 @@ A role-based full-stack web application that connects Students, Mentors, and Inv
 
 Built with a clear separation between frontend and backend using a three-tier architecture.
 
+
+
 - Tech Stack
+  
 
 Frontend
 
@@ -30,7 +33,10 @@ Database
 
 MySQL (mysql2)
 
+
+
 - Core Capabilities
+- 
 
 Role-based authentication (Student / Mentor / Investor)
 
@@ -51,7 +57,9 @@ Client (React) → REST API (Express) → MySQL Database
 
 Three-tier architecture with clear separation of concerns.
 
+
 -Local Setup
+
 Start Backend
 npm install
 node Backend/server.js
@@ -63,6 +71,8 @@ npm run dev
 Frontend: http://localhost:5173
 
 Backend: http://localhost:5000
+
+
 
 -Future Enhancements
 
