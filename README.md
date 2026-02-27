@@ -36,7 +36,7 @@ MySQL (mysql2)
 
 
 - Core Capabilities
-- 
+
 
 Role-based authentication (Student / Mentor / Investor)
 
