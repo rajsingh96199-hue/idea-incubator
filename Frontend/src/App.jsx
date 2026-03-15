@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -13,20 +13,32 @@ import { useEffect, useState } from "react";
 import Loader from "./components/Loader";
 import { registerLoader } from "./services/api";
 import MentorHistory from "./pages/MentorHistory";
-import Chat from "./pages/Chat";
+import Profile from "./pages/Profile";
+import ChatPage from "./pages/ChatPage";
+import socket from "./services/socket";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/login" />;
+  if (!token) return <Navigate to="/login" replace />;
   return children;
 }
 
 export default function App() {
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     registerLoader(setLoading);
   }, []);
+
+  // 🔥 Proper socket handling
+  useEffect(() => {
+  const myId = localStorage.getItem("userId");
+  if (!myId) return;
+
+  socket.emit("join", myId);
+}, []);
+ // reconnect on route change
 
   return (
     <>
@@ -39,7 +51,6 @@ export default function App() {
 
         {/* Public */}
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/register" element={<Register />} />
 
         {/* Student */}
@@ -66,16 +77,15 @@ export default function App() {
         />
 
         <Route
-           path="/notifications"
-           element={
-           <ProtectedRoute>
-             <MainLayout>
-             <Notifications />
-             </MainLayout>
-           </ProtectedRoute>
-  }
-/>
-
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Notifications />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Mentor */}
         <Route
@@ -84,6 +94,17 @@ export default function App() {
             <ProtectedRoute>
               <MainLayout>
                 <MentorDashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/mentor/history"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <MentorHistory />
               </MainLayout>
             </ProtectedRoute>
           }
@@ -101,32 +122,32 @@ export default function App() {
           }
         />
 
-        {/* Mentor History */}
+        {/* Profile */}
         <Route
-         path="/mentor/history"
-         element={
-           <ProtectedRoute>
-             <MainLayout>
-               <MentorHistory />
-             </MainLayout>
-           </ProtectedRoute>
-           }
-        />
-
-        <Route
-          path="/chat/:userId"
+          path="/profile"
           element={
-           <ProtectedRoute>
-            <MainLayout>
-              <Chat />
-            </MainLayout>
-           </ProtectedRoute>
+            <ProtectedRoute>
+              <MainLayout>
+                <Profile />
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
 
+        {/* Chat */}
+        <Route
+          path="/chat"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ChatPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/chat" replace />} />
       </Routes>
     </>
   );

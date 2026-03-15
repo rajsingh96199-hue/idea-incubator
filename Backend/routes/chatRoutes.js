@@ -3,42 +3,96 @@ const router = express.Router();
 const db = require("../config/db");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
+
 // SEND MESSAGE
 router.post("/send", authMiddleware, async (req, res) => {
-  const { receiver_id, message } = req.body;
+const { receiver_id, message } = req.body;
 
-  console.log("📩 SEND BODY:", req.body);
-  console.log("👤 SENDER:", req.user);
+if (!receiver_id || !message) {
+return res.status(400).json({ error: "Missing receiver or message" });
+}
 
-  if (!receiver_id || !message) {
-    return res.status(400).json({ error: "Missing receiver or message" });
-  }
+try {
 
+// insert message
+const [result] = await db.query(
+  `INSERT INTO messages (sender_id, receiver_id, message)
+   VALUES (?, ?, ?)`,
+  [req.user.id, receiver_id, message]
+);
+
+// fetch the exact row we just inserted
+const [rows] = await db.query(
+  `SELECT *
+   FROM messages
+   WHERE message_id = ?`,
+  [result.insertId]
+);
+
+res.json(rows[0]);
+
+} catch (err) {
+console.error("MYSQL ERROR:", err);
+res.status(500).json({ error: err.message });
+}
+});
+
+
+// GET CONVERSATION LIST
+router.get("/conversations", authMiddleware, async (req, res) => {
   try {
-    const [result] = await db.query(
-      `INSERT INTO messages (sender_id, receiver_id, message)
-       VALUES (?, ?, ?)`,
-      [req.user.id, receiver_id, message]
-    );
+    const userId = req.user.id;
 
-    console.log("✅ INSERT RESULT:", result);
+    const [rows] = await db.query(`
+      SELECT 
+        u.user_id,
+        u.name,
+        MAX(m.created_at) AS last_time,
+        (
+          SELECT message 
+          FROM messages 
+          WHERE 
+            (sender_id = u.user_id AND receiver_id = ?)
+            OR
+            (sender_id = ? AND receiver_id = u.user_id)
+          ORDER BY created_at DESC 
+          LIMIT 1
+        ) AS last_message,
+        (
+          SELECT COUNT(*) 
+          FROM messages 
+          WHERE sender_id = u.user_id 
+          AND receiver_id = ? 
+          AND status != 'seen'
+        ) AS unread_count
+      FROM messages m
+      JOIN users u 
+        ON u.user_id = 
+          CASE 
+            WHEN m.sender_id = ? THEN m.receiver_id
+            ELSE m.sender_id
+          END
+      WHERE m.sender_id = ? OR m.receiver_id = ?
+      GROUP BY u.user_id, u.name
+      ORDER BY last_time DESC
+    `, [userId, userId, userId, userId, userId, userId]);
 
-    res.json({ success: true });
+    res.json({ conversations: rows });
+
   } catch (err) {
-    console.error("🔥 MYSQL ERROR:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Conversation error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
 
-// GET CHAT BETWEEN TWO USERS
+// 🔥 ADD THIS BACK — THIS WAS MISSING
 router.get("/:userId", authMiddleware, async (req, res) => {
-  const otherUserId = req.params.userId;
-
   try {
-    // 1️⃣ Fetch messages
-    const [messages] = await db.query(
-      `
+    const otherUserId = req.params.userId;
+    const myId = req.user.id;
+
+    const [messages] = await db.query(`
       SELECT *
       FROM messages
       WHERE 
@@ -46,17 +100,13 @@ router.get("/:userId", authMiddleware, async (req, res) => {
         OR
         (sender_id = ? AND receiver_id = ?)
       ORDER BY created_at ASC
-      `,
-      [req.user.id, otherUserId, otherUserId, req.user.id]
-    );
+    `, [myId, otherUserId, otherUserId, myId]);
 
-    // 2️⃣ Fetch other user's name
     const [[receiver]] = await db.query(
       "SELECT name FROM users WHERE user_id = ?",
       [otherUserId]
     );
 
-    // 3️⃣ Send combined response
     res.json({
       messages,
       otherUser: {
@@ -69,6 +119,5 @@ router.get("/:userId", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 module.exports = router;

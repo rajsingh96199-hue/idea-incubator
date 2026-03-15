@@ -32,10 +32,11 @@ export default function Sidebar() {
   return (
     <div className="h-screen w-64 bg-slate-900 text-white fixed flex flex-col">
       <div className="p-6 text-2xl font-bold border-b border-gray-700">
-        Idea Incubator 🚀
+        InnoBridge 🚀
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-2">
+
         {role === "student" && (
           <>
             <NavLink to="/dashboard" className={linkClass}>
@@ -77,9 +78,13 @@ export default function Sidebar() {
             💰 Investor Dashboard
           </NavLink>
         )}
-      </nav>
 
-      {/* ❌ NO CHAT LINK HERE — CHAT IS CONTEXTUAL */}
+        {/* 👤 Profile for ALL roles */}
+        <NavLink to="/profile" className={linkClass}>
+          👤 Profile
+        </NavLink>
+
+      </nav>
 
       <div className="p-4 border-t border-gray-700">
         <button

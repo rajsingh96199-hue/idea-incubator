@@ -12,32 +12,52 @@ router.get(
   requireRole(["investor"]),
   async (req, res) => {
     try {
-      const [ideas] = await db.query(`
+      const { search, category } = req.query;
+
+      let query = `
         SELECT 
           i.idea_id,
           i.student_id,
           i.title,
           i.description,
+          i.category,
           i.status,
           u.name AS student_name,
           u.email AS student_email
         FROM ideas i
         JOIN users u ON i.student_id = u.user_id
         WHERE i.status = 'approved'
-        ORDER BY i.idea_id DESC
-      `);
+      `;
+
+      const params = [];
+
+      // 🔍 Search filter
+      if (search) {
+        query += " AND i.title LIKE ?";
+        params.push(`%${search}%`);
+      }
+
+      // 🏷 Category filter
+      if (category && category !== "All") {
+        query += " AND i.category = ?";
+        params.push(category);
+      }
+
+      query += " ORDER BY i.idea_id DESC";
+
+      const [ideas] = await db.query(query, params);
 
       res.status(200).json({
         count: ideas.length,
         ideas
       });
+
     } catch (err) {
       console.error("❌ Investor Approved Route Error:", err);
       res.status(500).json({ error: "Server error" });
     }
   }
 );
-
 /**
  * Express Interest
  */

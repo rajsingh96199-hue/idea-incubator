@@ -16,10 +16,10 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await login({ email, password });
-
+      console.log("LOGIN RESPONSE:", res.data);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
-
+      localStorage.setItem("userId", res.data.user_id);
       toast.success("Welcome back 🚀");
 
       if (res.data.role === "student") navigate("/dashboard");
