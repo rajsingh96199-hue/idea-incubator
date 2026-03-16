@@ -8,7 +8,7 @@ export const registerLoader = (setLoading) => {
 };
 
 const api = axios.create({
-baseURL: "https://idea-incubator-production.up.railway.app/api",});
+baseURL: "https://innobridge-backend.onrender.com/api",});
 
 api.interceptors.request.use((config) => {
   activeRequests++;

@@ -11,7 +11,13 @@ const db = require("./config/db");
 // -------------------- MIDDLEWARE --------------------
 app.use(express.json({ limit: "1mb" }));
 
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5173", "https://innobridge-a90a4.web.app"],
+  methods: ["GET","POST","PUT","DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+
 // -------------------- DB CONNECTION --------------------
 db.getConnection()
   .then(() => console.log("✔️ Database connected"))
