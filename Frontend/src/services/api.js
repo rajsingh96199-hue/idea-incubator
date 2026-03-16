@@ -8,8 +8,7 @@ export const registerLoader = (setLoading) => {
 };
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-});
+baseURL: "https://idea-incubator-production.up.railway.app/api",});
 
 api.interceptors.request.use((config) => {
   activeRequests++;
