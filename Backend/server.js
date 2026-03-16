@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+
 
 const app = express();
 const http = require("http");
@@ -12,7 +12,7 @@ const db = require("./config/db");
 app.use(express.json({ limit: "1mb" }));
 
 app.use(cors({
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173", "https://innobridge-a90a4.web.app"],
   methods: ["GET","POST","PUT","DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
@@ -50,7 +50,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://innobridge-a90a4.web.app"],
     methods: ["GET", "POST"]
   }
 });
