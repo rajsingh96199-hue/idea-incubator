@@ -29,7 +29,7 @@ export default function AddIdea() {
       setLoading(true);
 
       await axios.post(
-        "http://localhost:5000/api/ideas/create",
+  "https://innobridge-backend.onrender.com/api/ideas/create",
         { title, description, category },
         {
           headers: {

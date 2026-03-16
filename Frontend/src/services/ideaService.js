@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api";
+const API = "https://innobridge-backend.onrender.com/api";
 
 const authHeader = () => {
   const token = localStorage.getItem("token");
