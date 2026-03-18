@@ -18,10 +18,14 @@ router.post(
         return res.status(400).json({ error: "Missing fields" });
       }
 
-      await db.query(
-        "INSERT INTO ideas (student_id, title, description, category) VALUES (?, ?, ?, ?)",
-        [req.user.id, title, description, category || "General"]
-      );
+
+   
+    console.log("INSERT DATA:", req.user.id, title, description, category);
+    
+   await db.query(
+  "INSERT INTO ideas (student_id, user_id, title, description, category) VALUES (?, ?, ?, ?, ?)",
+  [req.user.id, req.user.id, title, description, category || "General"]
+);
 
       res.status(201).json({ message: "Idea created successfully" });
 
