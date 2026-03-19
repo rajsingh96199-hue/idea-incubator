@@ -92,20 +92,20 @@ router.post(
         return res.status(400).json({ error: "Already expressed interest" });
       }
 
-      // Save interest
-      await db.query(
-        "INSERT INTO interest (idea_id, investor_id) VALUES (?, ?)",
-        [ideaId, investorId]
-      );
+     // insert interest
+await db.query(
+  "INSERT INTO interest (idea_id, investor_id) VALUES (?, ?)",
+  [ideaId, investorId]
+);
 
-      // Notify student
-      await db.query(
-        "INSERT INTO notifications (user_id, message) VALUES (?, ?)",
-        [
-          studentId,
-          "📩 An investor is interested in your idea! You can start a chat."
-        ]
-      );
+// 🔥 trigger chat
+await db.query(
+  `INSERT INTO messages (sender_id, receiver_id, message)
+   VALUES (?, ?, ?)`,
+  [investorId, studentId, "Hi, I'm interested in your idea"]
+);
+
+// send notification (if you have)
 
       res.status(201).json({
         success: true,
